@@ -1,7 +1,7 @@
 # Emotion-prediction-from-audio
 # Speech Emotion Recognition with Deep Learning
 
-A robust deep learning system for recognizing emotions from speech audio using a hybrid CNN-BiLSTM architecture with attention mechanisms.
+A robust deep learning system for recognizing emotions from speech audio using a hybrid CNN-BiLSTM architecture with attention mechanisms. StreamLit app link- https://emotion-prediction-from-audio-fbnquh7fpsz6venbhjcwpc.streamlit.app/
 
 ## Overview
 

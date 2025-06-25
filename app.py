@@ -129,7 +129,8 @@ def load_model():
     
     try:
         # Try to load the model weights
-        model.load_state_dict(torch.load("best_emotion_model.pth", map_location=device))
+        model.load_state_dict(torch.load("compressed_model.pth", map_location="cpu")) 
+        model.half()      
         model.eval()
         return model, device
     except FileNotFoundError:

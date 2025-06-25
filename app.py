@@ -112,7 +112,7 @@ def extract_features(audio, sr, max_len=862, n_mfcc=13):
     else:
         features = features[:, :max_len]
     
-    features = torch.tensor(features, dtype=torch.float32).unsqueeze(0)  # Add batch dimension
+    features = torch.tensor(features, dtype=torch.float16).unsqueeze(0)  # Add batch dimension
     
     # Normalize
     mean = features.mean(dim=2, keepdim=True)

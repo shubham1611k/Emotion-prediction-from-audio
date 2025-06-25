@@ -38,14 +38,12 @@ class ResidualBlock1D(nn.Module):
     def forward(self, x):
         return F.gelu(self.conv_block(x) + self.shortcut(x))
 
-class ImprovedCNNBiLSTMAttention(nn.Module):
-    def __init__(self, input_dim=45, hidden_dim=256, num_classes=8, dropout=0.3):
+class CNNBiLSTMAttention(nn.Module):
+    def __init__(self, input_dim=40, hidden_dim=256, num_classes=8, dropout=0.3):
         super().__init__()
 
         self.feature_extractor = nn.Sequential(
-            ResidualBlock1D(input_dim, 64, dropout=dropout),
-            nn.MaxPool1d(2),
-            ResidualBlock1D(64, 128, dropout=dropout),
+            ResidualBlock1D(input_dim, 128, dropout=dropout),
             nn.MaxPool1d(2),
             ResidualBlock1D(128, 256, dropout=dropout),
             nn.MaxPool1d(2),
@@ -95,9 +93,6 @@ def extract_features(audio, sr, max_len=862, n_mfcc=13):
     """Extract features from audio file"""
     # Basic MFCC features
     mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=n_mfcc, hop_length=512, n_fft=2048)
-    delta1 = librosa.feature.delta(mfccs)
-    delta2 = librosa.feature.delta(mfccs, order=2)
-    
     # Spectral features
     chroma = librosa.feature.chroma_stft(y=audio, sr=sr, hop_length=512)
     contrast = librosa.feature.spectral_contrast(y=audio, sr=sr, hop_length=512)
@@ -106,11 +101,9 @@ def extract_features(audio, sr, max_len=862, n_mfcc=13):
     # Rhythm and energy features
     zcr = librosa.feature.zero_crossing_rate(y=audio, hop_length=512)
     rms = librosa.feature.rms(y=audio, hop_length=512)
-    rolloff = librosa.feature.spectral_rolloff(y=audio, sr=sr, hop_length=512)
-    centroid = librosa.feature.spectral_centroid(y=audio, sr=sr, hop_length=512)
     
     # Combine all features
-    features = np.vstack([mfccs, delta1, delta2, chroma, contrast, tonnetz, zcr, rms, rolloff, centroid])
+    features = np.vstack([mfccs, chroma, contrast, tonnetz, zcr, rms])
     
     # Padding/truncation
     if features.shape[1] < max_len:
@@ -132,7 +125,7 @@ def extract_features(audio, sr, max_len=862, n_mfcc=13):
 def load_model():
     """Load the trained model"""
     device = torch.device("cpu")  # Use CPU for Streamlit deployment
-    model = ImprovedCNNBiLSTMAttention(input_dim=45, num_classes=8)
+    model = CNNBiLSTMAttention(input_dim=40, num_classes=8)
     
     try:
         # Try to load the model weights
@@ -140,7 +133,7 @@ def load_model():
         model.eval()
         return model, device
     except FileNotFoundError:
-        st.error("Model file 'best_emotion_model.pth' not found. Please make sure the model is trained and saved.")
+        st.error("Model file 'emotion_model.pth' not found. Please make sure the model is trained and saved.")
         return None, device
 
 def predict_emotion(audio_file, model, device):
